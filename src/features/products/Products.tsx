@@ -4,11 +4,13 @@ import styles from "./Products.module.css";
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+
   useEffect(() => {
     getProducts().then((products) => {
       setProducts(products);
     });
   }, []);
+
   return (
     <main className="page">
       <ul className={styles.products}>

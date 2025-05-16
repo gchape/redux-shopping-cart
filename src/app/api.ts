@@ -9,29 +9,32 @@ export interface Product {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const results = await fetch("/products.json");
-  const products = results.json();
-  return products;
+  return await fetch("/products.json", {
+    method: "GET",
+    mode: "same-origin",
+  })
+    .then((resp) => resp.json())
+    .catch((error) => console.warn(error));
 }
 
 export type CartItems = { [productID: string]: number };
-export type CheckoutResponse = { success: boolean; error?: string };
+export type CheckoutResponse = { success: boolean; message?: string };
 
 export async function checkout(items: CartItems): Promise<CheckoutResponse> {
   const modifier = Object.keys(items).length > 0 ? "success" : "error";
   const url = `/checkout-${modifier}.json`;
+
   await sleep(500);
-  const response = await fetch(url, {
+
+  return await fetch(url, {
     method: "POST",
     body: JSON.stringify(items),
-  });
-  const data = await response.json();
-  if (!data.success) {
-    throw new Error(data.error);
-  }
-  return data as CheckoutResponse;
+  })
+    .then((resp) => resp.json() as Promise<CheckoutResponse>)
+    .catch((error: CheckoutResponse) => {
+      throw new Error(error.message);
+    });
 }
 
 // utility function to simulate slowness in an API call
-const sleep = (time: number) =>
-  new Promise((res) => setTimeout(res, time));
+const sleep = (time: number) => new Promise((res) => setTimeout(res, time));
