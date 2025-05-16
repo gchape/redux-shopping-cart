@@ -3,10 +3,11 @@ import styles from "./Products.module.css";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { receivedProducts } from "./productsSlice";
 import { getProducts } from "../../app/api";
+import { addToCart } from "../cart/cartSlice";
 
 export function Products() {
   const dispatch = useAppDispatch();
-  
+
   useEffect(() => {
     getProducts().then((products) => {
       dispatch(receivedProducts(products));
@@ -31,7 +32,9 @@ export function Products() {
                 <h1>{product.name}</h1>
                 <p>{product.description}</p>
                 <p>${product.price}</p>
-                <button>Add to Cart 🛒</button>
+                <button onClick={() => dispatch(addToCart(product.id))}>
+                  Add to Cart 🛒
+                </button>
               </div>
             </article>
           </li>
