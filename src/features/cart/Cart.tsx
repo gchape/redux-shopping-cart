@@ -1,17 +1,34 @@
 import React from "react";
+import classNames from "classnames";
 import styles from "./Cart.module.css";
-import { useAppSelector } from "../../app/hooks";
-import { getTotalPrice } from "./cartSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { getTotalPrice, removeFromCart, updateQuantity } from "./cartSlice";
 
 export function Cart() {
-  const products = useAppSelector((state) => state.products.products);
-  const items = useAppSelector((state) => state.cart.items);
+  const dispatch = useAppDispatch();
   const totalPrice = useAppSelector(getTotalPrice);
+  const items = useAppSelector((state) => state.cart.items);
+  const products = useAppSelector((state) => state.products.products);
+  const checkoutState = useAppSelector((state) => state.cart.checkoutState);
+
+  function onQuantityChanged(
+    e: React.FocusEvent<HTMLInputElement>,
+    id: string
+  ) {
+    const quantity = Number(e.target.value) || 0;
+    dispatch(updateQuantity({ id, quantity }));
+  }
+
+  const tableClasses = classNames({
+    [styles.table]: true,
+    [styles.checkoutError]: checkoutState === "ERROR",
+    [styles.checkoutLoading]: checkoutState === "LOADING",
+  });
 
   return (
     <main className="page">
       <h1>Shopping Cart</h1>
-      <table className={styles.table}>
+      <table className={tableClasses}>
         <thead>
           <tr>
             <th>Product</th>
@@ -29,12 +46,14 @@ export function Cart() {
                   type="text"
                   className={styles.input}
                   defaultValue={quantity}
+                  onBlur={(e) => onQuantityChanged(e, id)}
                 />
               </td>
               <td>${products[id].price}</td>
               <td>
                 <button
                   aria-label={`Remove ${products[id].name} from Shopping Cart`}
+                  onClick={() => dispatch(removeFromCart(id))}
                 >
                   X
                 </button>
